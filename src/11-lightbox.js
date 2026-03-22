@@ -19,7 +19,7 @@
     y = e.querySelector(".news--info-image"),
     f = e.querySelector(".news--info-wrapper"),
     g = f?.querySelector(".small-text"),
-    pI = e.querySelector('[data-popup="ingredient-image"]'),
+    pI = (function () { var el = e.querySelector('[data-popup="ingredient-image"]'); if (el) el.removeAttribute('loading'); return el; })(),
     pN = e.querySelector('[data-popup="perfume-name"]'),
     pF = e.querySelector('[data-popup="fragrance-type"]'),
     pT = e.querySelector('[data-popup="top-note"]'),
@@ -39,6 +39,7 @@
     tp = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
   let S = null, A = 0, P = 0, _ = false, L = false, R = false, D = null, ne = null, se = null, ae = 0;
+  const iiCache = new Map();
 
   function le(e) {
     ne && (ne.raf(e), se = requestAnimationFrame(le));
@@ -64,8 +65,8 @@
     e.stopPropagation();
   }
 
-  const N = "precision mediump float;attribute vec3 position;attribute vec2 texcoord;uniform mat4 uMatrix;uniform mat4 uTmatrix;uniform float uTime;uniform vec2 uOffset;uniform float uPower;varying vec2 vTexcoord;void main(){vec3 pos=position.xzy;float dist=distance(uOffset,vec2(pos.x,pos.y));float rippleEffect=cos(15.0*(dist-(uTime/60.0)));float distortionEffect=rippleEffect*uPower;pos.x+=(distortionEffect/30.0*(uOffset.x-pos.x));pos.y+=distortionEffect/30.0*(uOffset.y-pos.y);gl_Position=uMatrix*vec4(pos,1.0);vTexcoord=(uTmatrix*vec4(texcoord-vec2(.5),0,1)).xy+vec2(.5);}",
-    U = "precision mediump float;uniform sampler2D uTexOne;uniform sampler2D uTexTwo;uniform float uWipeProgress;varying vec2 vTexcoord;void main(){vec2 uv=vTexcoord;vec4 texOne=texture2D(uTexOne,uv);vec4 texTwo=texture2D(uTexTwo,uv);gl_FragColor=mix(texOne,texTwo,uWipeProgress);}";
+  const N = "precision mediump float;attribute vec3 position;attribute vec2 texcoord;uniform mat4 uMatrix;uniform float uTime;uniform vec2 uOffset;uniform float uPower;varying vec2 vTexcoord;void main(){vec3 pos=position.xzy;float dist=distance(uOffset,vec2(pos.x,pos.y));float rippleEffect=cos(15.0*(dist-(uTime/60.0)));float distortionEffect=rippleEffect*uPower;pos.x+=(distortionEffect/30.0*(uOffset.x-pos.x));pos.y+=distortionEffect/30.0*(uOffset.y-pos.y);gl_Position=uMatrix*vec4(pos,1.0);vTexcoord=texcoord;}",
+    U = "precision mediump float;uniform sampler2D uTexOne;uniform sampler2D uTexTwo;uniform mat4 uTmatrixOne;uniform mat4 uTmatrixTwo;uniform float uWipeProgress;varying vec2 vTexcoord;void main(){vec2 uvOne=(uTmatrixOne*vec4(vTexcoord-vec2(.5),0,1)).xy+vec2(.5);vec2 uvTwo=(uTmatrixTwo*vec4(vTexcoord-vec2(.5),0,1)).xy+vec2(.5);vec4 texOne=texture2D(uTexOne,uvOne);vec4 texTwo=texture2D(uTexTwo,uvTwo);gl_FragColor=mix(texOne,texTwo,uWipeProgress);}";
 
   let O = false, C = null, B = null, X = null, $ = null, k = null, F = false;
 
@@ -97,23 +98,32 @@
     return i;
   }
 
+  function coverMatrix(m4, containerW, containerH, texW, texH) {
+    var mat = m4.identity();
+    var cr = containerW / containerH, tr = texW / texH;
+    var s = 1, a = 1;
+    if (cr > tr) a = tr / cr; else s = cr / tr;
+    s *= b; a *= b;
+    m4.scale(mat, [s, a, 1], mat);
+    return mat;
+  }
+
   function z() {
     if (!B || !C) return;
     if (twgl.resizeCanvasToDisplaySize(C), B.viewport(0, 0, B.drawingBufferWidth, B.drawingBufferHeight), B.clearColor(0, 0, 0, 0), B.clear(B.COLOR_BUFFER_BIT), !G.textures.current || !G.textures.next) return;
     const e = twgl.m4;
-    let t = e.identity(), i = e.identity();
-    const r = C.width / b / (C.height / b), o = G.textureInfos.current, n = o.width / o.height;
-    let s = 1, a = 1;
-    r > n ? a = n / r : s = r / n;
-    s *= b; a *= b;
-    e.scale(i, [s, a, 1], i);
+    let t = e.identity();
+    var cw = C.width / b, ch = C.height / b;
+    var tOne = G.textureInfos.current, tTwo = G.textureInfos.next;
+    var matOne = coverMatrix(e, cw, ch, tOne.width, tOne.height);
+    var matTwo = coverMatrix(e, cw, ch, tTwo.width, tTwo.height);
     G.time++;
     e.ortho(0, C.width, C.height, 0, -1, 1, t);
     e.translate(t, [C.width / 2, C.height / 2, 1], t);
     e.scale(t, [C.width, C.height, 1], t);
     B.useProgram(X.program);
     twgl.setBuffersAndAttributes(B, X, $);
-    twgl.setUniforms(X, { uMatrix: t, uTmatrix: i, uTexOne: G.textures.current, uTexTwo: G.textures.next, uTime: G.time, uPower: G.power, uWipeProgress: G.wipeProgress, uOffset: G.offset });
+    twgl.setUniforms(X, { uMatrix: t, uTmatrixOne: matOne, uTmatrixTwo: matTwo, uTexOne: G.textures.current, uTexTwo: G.textures.next, uTime: G.time, uPower: G.power, uWipeProgress: G.wipeProgress, uOffset: G.offset });
     twgl.drawBufferInfo(B, $);
     F && (k = requestAnimationFrame(z));
   }
@@ -151,29 +161,23 @@
           C.style.opacity = "1";
           r && (r.style.opacity = "0");
           o && (o.style.opacity = "0");
+          if (G.preloadedNextImage) {
+            r.src = G.preloadedNextImage.src;
+            r.alt = G.pendingNextAlt || "";
+          }
         });
         const t = 1.5, i = gsap.timeline({ paused: true });
         i.to(G, { power: .3, duration: .4, ease: "none" }).to(G, { power: 0, duration: .8, ease: "none" });
         gsap.timeline({
           onComplete: () => {
             if (ue !== ae) return void oe();
-            if (G.preloadedNextImage) {
-              r.src = G.preloadedNextImage.src;
-              r.alt = G.pendingNextAlt || "";
-              const t = () => {
-                r && (r.style.opacity = "1");
-                C.style.opacity = "0";
-                oe();
-                e();
-              };
-              r.decode ? r.decode().then(t).catch(t) : requestAnimationFrame(t);
-            } else
-              requestAnimationFrame(() => {
-                r && (r.style.opacity = "1");
-                C.style.opacity = "0";
-                oe();
-                e();
-              });
+            const t = () => {
+              r && (r.style.opacity = "1");
+              C.style.opacity = "0";
+              oe();
+              e();
+            };
+            r.decode ? r.decode().then(t).catch(t) : requestAnimationFrame(t);
           },
         }).to(i, { progress: 1, duration: t, ease: "power2.inOut" }, 0).to(G, { wipeProgress: 1, duration: 1, ease: "none" }, .5);
       }(n);
@@ -268,7 +272,19 @@
     r && (r.src = e.gallery[0], r.alt = e.name, gsap.set(r, { opacity: 1 }));
     o && gsap.set(o, { opacity: 0 });
     n && (n.textContent = e.description);
-    pI && (e.ingredientImage ? (pI.src = e.ingredientImage, pI.alt = e.perfumeName || e.name) : (pI.src = tp, pI.alt = ""));
+    if (pI) {
+      pI.src = tp; pI.alt = "";
+      if (e.ingredientImage) {
+        if (iiCache.has(e.ingredientImage)) {
+          pI.src = e.ingredientImage; pI.alt = e.perfumeName || e.name;
+        } else {
+          var ii = new Image();
+          ii.src = e.ingredientImage;
+          var setII = function () { iiCache.set(e.ingredientImage, true); pI.src = e.ingredientImage; pI.alt = e.perfumeName || e.name; };
+          ii.decode ? ii.decode().then(setII).catch(setII) : (ii.onload = setII);
+        }
+      }
+    }
     pN && (pN.textContent = e.perfumeName || e.name);
     pF && (pF.textContent = e.fragranceType);
     pT && (pT.textContent = e.topNote);
@@ -358,10 +374,24 @@
     R = true; ae++;
     D && (D.kill(), D = null);
     Q();
+
+    var iiReady = Promise.resolve();
+    var nextData = Y[e];
+    if (nextData.ingredientImage && !iiCache.has(nextData.ingredientImage)) {
+      iiReady = new Promise(function (resolve) {
+        var ii = new Image();
+        ii.src = nextData.ingredientImage;
+        var done = function () { iiCache.set(nextData.ingredientImage, true); resolve(); };
+        ii.decode ? ii.decode().then(done).catch(done) : (ii.onload = done, ii.onerror = done);
+      });
+    }
+
     c && (c.style.transition = `opacity 700ms ${T}`, c.style.opacity = "0");
     t && (t.style.transition = `opacity 700ms ${T}`, t.style.opacity = "0");
 
-    setTimeout(() => {
+    var fadeOutDone = new Promise(function (resolve) { setTimeout(resolve, q); });
+
+    Promise.all([fadeOutDone, iiReady]).then(function () {
       W();
       gsap.killTweensOf(G);
       C && (C.style.opacity = "0");
@@ -376,13 +406,13 @@
         pcr.scrollTop = 0, ne = new Lenis({ wrapper: pcr, content: pcr.children[0], duration: 2, easing: function (t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); }, smoothWheel: true, smoothTouch: false }), window.popupLenis = ne, se = requestAnimationFrame(le);
       c && (c.style.transition = `opacity 700ms ${w}`, c.style.opacity = "1");
       t && (t.style.transition = `opacity 700ms ${w}`, t.style.opacity = "1");
-      setTimeout(() => {
+      setTimeout(function () {
         c && (c.style.transition = "");
         t && (t.style.transition = "");
         R = false;
         V(Y[A]);
       }, q);
-    }, q);
+    });
   }
 
   x.forEach((e, t) => { e.style.cursor = "pointer"; e.addEventListener("click", () => te("product", t)); });
