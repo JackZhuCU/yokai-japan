@@ -65,8 +65,8 @@
     e.stopPropagation();
   }
 
-  const N = "precision mediump float;attribute vec3 position;attribute vec2 texcoord;uniform mat4 uMatrix;uniform float uTime;uniform vec2 uOffset;uniform float uPower;varying vec2 vTexcoord;void main(){vec3 pos=position.xzy;float dist=distance(uOffset,vec2(pos.x,pos.y));float rippleEffect=cos(15.0*(dist-(uTime/60.0)));float distortionEffect=rippleEffect*uPower;pos.x+=(distortionEffect/30.0*(uOffset.x-pos.x));pos.y+=distortionEffect/30.0*(uOffset.y-pos.y);gl_Position=uMatrix*vec4(pos,1.0);vTexcoord=texcoord;}",
-    U = "precision mediump float;uniform sampler2D uTexOne;uniform sampler2D uTexTwo;uniform mat4 uTmatrixOne;uniform mat4 uTmatrixTwo;uniform float uWipeProgress;varying vec2 vTexcoord;void main(){vec2 uvOne=(uTmatrixOne*vec4(vTexcoord-vec2(.5),0,1)).xy+vec2(.5);vec2 uvTwo=(uTmatrixTwo*vec4(vTexcoord-vec2(.5),0,1)).xy+vec2(.5);vec4 texOne=texture2D(uTexOne,uvOne);vec4 texTwo=texture2D(uTexTwo,uvTwo);gl_FragColor=mix(texOne,texTwo,uWipeProgress);}";
+  const N = "precision mediump float;attribute vec3 position;attribute vec2 texcoord;uniform mat4 uMatrix;uniform mat4 uTmatrix;uniform float uTime;uniform vec2 uOffset;uniform float uPower;varying vec2 vTexcoord;void main(){vec3 pos=position.xzy;float dist=distance(uOffset,vec2(pos.x,pos.y));float rippleEffect=cos(15.0*(dist-(uTime/60.0)));float distortionEffect=rippleEffect*uPower;pos.x+=(distortionEffect/30.0*(uOffset.x-pos.x));pos.y+=distortionEffect/30.0*(uOffset.y-pos.y);gl_Position=uMatrix*vec4(pos,1.0);vTexcoord=(uTmatrix*vec4(texcoord-vec2(.5),0,1)).xy+vec2(.5);}",
+    U = "precision mediump float;uniform sampler2D uTexOne;uniform sampler2D uTexTwo;uniform float uWipeProgress;varying vec2 vTexcoord;void main(){vec2 uv=vTexcoord;vec4 texOne=texture2D(uTexOne,uv);vec4 texTwo=texture2D(uTexTwo,uv);gl_FragColor=mix(texOne,texTwo,uWipeProgress);}";
 
   let O = false, C = null, B = null, X = null, $ = null, k = null, F = false;
 
@@ -114,16 +114,15 @@
     const e = twgl.m4;
     let t = e.identity();
     var cw = C.width / b, ch = C.height / b;
-    var tOne = G.textureInfos.current, tTwo = G.textureInfos.next;
-    var matOne = coverMatrix(e, cw, ch, tOne.width, tOne.height);
-    var matTwo = coverMatrix(e, cw, ch, tTwo.width, tTwo.height);
+    var tNext = G.textureInfos.next;
+    var mat = coverMatrix(e, cw, ch, tNext.width, tNext.height);
     G.time++;
     e.ortho(0, C.width, C.height, 0, -1, 1, t);
     e.translate(t, [C.width / 2, C.height / 2, 1], t);
     e.scale(t, [C.width, C.height, 1], t);
     B.useProgram(X.program);
     twgl.setBuffersAndAttributes(B, X, $);
-    twgl.setUniforms(X, { uMatrix: t, uTmatrixOne: matOne, uTmatrixTwo: matTwo, uTexOne: G.textures.current, uTexTwo: G.textures.next, uTime: G.time, uPower: G.power, uWipeProgress: G.wipeProgress, uOffset: G.offset });
+    twgl.setUniforms(X, { uMatrix: t, uTmatrix: mat, uTexOne: G.textures.current, uTexTwo: G.textures.next, uTime: G.time, uPower: G.power, uWipeProgress: G.wipeProgress, uOffset: G.offset });
     twgl.drawBufferInfo(B, $);
     F && (k = requestAnimationFrame(z));
   }
