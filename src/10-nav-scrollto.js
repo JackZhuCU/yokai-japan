@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let cur = null,
     isSc = false;
 
-  const mp = { top: 'hero', concept: 'concept', products: 'product', news: 'news', location: 'store', contact: 'contact' };
+  const mp = { top: 'hero', concept: 'concept', products: 'product', location: 'store', news: 'news', contact: 'contact' };
 
   const gS = (lk) => {
     let t = lk.querySelector('.small-text')?.textContent.trim().toLowerCase();
