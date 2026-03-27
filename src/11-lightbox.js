@@ -415,8 +415,11 @@
       var pcr = c?.querySelector(".popup--content-right");
       if (pcr && typeof Lenis !== "undefined")
         pcr.scrollTop = 0, ne = new Lenis({ wrapper: pcr, content: pcr.children[0], duration: 2, easing: function (t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); }, smoothWheel: true, smoothTouch: false }), window.popupLenis = ne, se = requestAnimationFrame(le);
-      c && (c.style.transition = `opacity 700ms ${w}`, c.style.opacity = "1");
-      t && (t.style.transition = `opacity 700ms ${w}`, t.style.opacity = "1");
+      var showContent = function () {
+        c && (c.style.transition = `opacity 700ms ${w}`, c.style.opacity = "1");
+        t && (t.style.transition = `opacity 700ms ${w}`, t.style.opacity = "1");
+      };
+      r && r.decode ? r.decode().then(showContent).catch(showContent) : showContent();
       setTimeout(function () {
         c && (c.style.transition = "");
         t && (t.style.transition = "");
