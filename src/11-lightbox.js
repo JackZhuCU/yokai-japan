@@ -114,8 +114,11 @@
     const e = twgl.m4;
     let t = e.identity();
     var cw = C.width / b, ch = C.height / b;
-    var tNext = G.textureInfos.next;
-    var mat = coverMatrix(e, cw, ch, tNext.width, tNext.height);
+    var tCur = G.textureInfos.current, tNext = G.textureInfos.next;
+    var crCur = tCur.width / tCur.height, crNext = tNext.width / tNext.height;
+    var cr = cw / ch, wp = G.wipeProgress;
+    var trLerp = crCur + (crNext - crCur) * wp;
+    var mat = coverMatrix(e, cw, ch, trLerp, 1);
     G.time++;
     e.ortho(0, C.width, C.height, 0, -1, 1, t);
     e.translate(t, [C.width / 2, C.height / 2, 1], t);
