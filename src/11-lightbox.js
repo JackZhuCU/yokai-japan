@@ -116,7 +116,7 @@
     var cw = C.width / b, ch = C.height / b;
     var tCur = G.textureInfos.current, tNext = G.textureInfos.next;
     var crCur = tCur.width / tCur.height, crNext = tNext.width / tNext.height;
-    var cr = cw / ch, wp = G.wipeProgress;
+    var wp = G.wipeProgress;
     var trLerp = crCur + (crNext - crCur) * wp;
     var mat = coverMatrix(e, cw, ch, trLerp, 1);
     G.time++;
