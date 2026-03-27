@@ -160,26 +160,39 @@
         F = true;
         z();
         requestAnimationFrame(() => {
+          C.style.transition = "opacity 150ms ease";
           C.style.opacity = "1";
-          r && (r.style.opacity = "0");
-          o && (o.style.opacity = "0");
-          if (G.preloadedNextImage) {
-            r.src = G.preloadedNextImage.src;
-            r.alt = G.pendingNextAlt || "";
-          }
+          setTimeout(function () {
+            r && (r.style.opacity = "0");
+            o && (o.style.opacity = "0");
+            C.style.transition = "";
+            if (G.preloadedNextImage) {
+              r.src = G.preloadedNextImage.src;
+              r.alt = G.pendingNextAlt || "";
+            }
+          }, 150);
         });
         const t = 1.5, i = gsap.timeline({ paused: true });
         i.to(G, { power: .3, duration: .4, ease: "none" }).to(G, { power: 0, duration: .8, ease: "none" });
         gsap.timeline({
           onComplete: () => {
             if (ue !== ae) return void oe();
-            const t = () => {
-              r && (r.style.opacity = "1");
+            var done = function () {
+              C.style.transition = "opacity 150ms ease";
               C.style.opacity = "0";
-              oe();
-              e();
+              setTimeout(function () {
+                C.style.transition = "";
+                oe();
+                e();
+              }, 150);
             };
-            r.decode ? r.decode().then(t).catch(t) : requestAnimationFrame(t);
+            r && r.decode ? r.decode().then(function () {
+              r.style.opacity = "1";
+              done();
+            }).catch(function () {
+              r.style.opacity = "1";
+              done();
+            }) : (r && (r.style.opacity = "1"), done());
           },
         }).to(i, { progress: 1, duration: t, ease: "power2.inOut" }, 0).to(G, { wipeProgress: 1, duration: 1, ease: "none" }, .5);
       }(n);
