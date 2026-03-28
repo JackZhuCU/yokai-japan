@@ -56,24 +56,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }, 50);
 
-  dn.forEach((lk) => {
-    lk.addEventListener('click', (ev) => {
-      ev.preventDefault();
-      if (isSc) return;
-      isSc = true;
-      const s = gS(lk),
-        ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2),
-        tg = s === 'hero' ? 0 : document.getElementById(s);
-      if (tg === 0 || tg) {
-        const dist = Math.abs((tg === 0 ? 0 : tg.getBoundingClientRect().top + window.scrollY) - window.scrollY);
-        const dur = Math.min(Math.max(0.6 + Math.sqrt(dist) / 50, 0.6), 1.8);
-        SScroll.scrollTo(tg, { duration: dur, easing: ease });
-        setTimeout(() => {
-          isSc = false;
-        }, dur * 1000 + 100);
-      } else {
-        isSc = false;
-      }
-    });
-  });
+  const scrollTo = (lk) => {
+    if (isSc) return;
+    isSc = true;
+    const s = gS(lk),
+      ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2),
+      tg = s === 'hero' ? 0 : document.getElementById(s);
+    if (tg === 0 || tg) {
+      const dist = Math.abs((tg === 0 ? 0 : tg.getBoundingClientRect().top + window.scrollY) - window.scrollY);
+      const dur = Math.min(Math.max(0.6 + Math.sqrt(dist) / 50, 0.6), 1.8);
+      SScroll.scrollTo(tg, { duration: dur, easing: ease });
+      setTimeout(() => { isSc = false; }, dur * 1000 + 100);
+    } else {
+      isSc = false;
+    }
+  };
+
+  dn.forEach((lk) => { lk.addEventListener('click', (ev) => { ev.preventDefault(); scrollTo(lk); }); });
+
+  const fn = document.querySelectorAll('.footer--link-wrapper .nav-link');
+  fn.forEach((lk) => { lk.addEventListener('click', (ev) => { ev.preventDefault(); scrollTo(lk); }); });
 });
