@@ -74,6 +74,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   dn.forEach((lk) => { lk.addEventListener('click', (ev) => { ev.preventDefault(); scrollTo(lk); }); });
 
-  const fn = document.querySelectorAll('.footer--link-wrapper .nav-link');
+  const fn = document.querySelectorAll('.footer--link-wrapper .secondary--button');
   fn.forEach((lk) => { lk.addEventListener('click', (ev) => { ev.preventDefault(); scrollTo(lk); }); });
 });
