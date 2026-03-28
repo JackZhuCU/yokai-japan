@@ -76,4 +76,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const fn = document.querySelectorAll('.footer--link-wrapper .secondary--button');
   fn.forEach((lk) => { lk.addEventListener('click', (ev) => { ev.preventDefault(); scrollTo(lk); }); });
+
+  const st = document.querySelector('[data-scroll-top]');
+  if (st) st.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    if (isSc) return;
+    isSc = true;
+    const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+    const dist = window.scrollY;
+    const dur = Math.min(Math.max(0.6 + Math.sqrt(dist) / 50, 0.6), 1.8);
+    SScroll.scrollTo(0, { duration: dur, easing: ease });
+    setTimeout(() => { isSc = false; }, dur * 1000 + 100);
+  });
 });
