@@ -10,7 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (lines.length < 2) return;
   const BD = 0.7, PD = 0.15, CD = 0.6, ST = 0.07, BTN = 0.8, EI = 'expo.out', BE = 'circ.inOut';
   let isOpen = false, isAnim = false, openTl = null, sc = [], mY = 0, lastBg = null;
-  gsap.set(c, { opacity: 1, visibility: 'visible', clipPath: 'inset(100% 0 0 0)', pointerEvents: 'none' });
+  const wipe = { v: 100 };
+  const setWipe = () => { c.style.clipPath = 'inset(' + wipe.v + '% 0 0 0)'; };
+  gsap.set(c, { opacity: 1, visibility: 'visible', pointerEvents: 'none' });
+  setWipe();
   gsap.set(l, { opacity: 0, y: 20 });
   if (ml) gsap.set(ml, { opacity: 0, y: 20 });
   const calc = () => {
@@ -50,7 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.SScroll) window.SScroll.stop();
     m.classList.add('is-active');
     openTl = gsap.timeline({ onComplete: () => { isAnim = false; isOpen = true; openTl = null; } });
-    openTl.to(c, { clipPath: 'inset(0 0 0 0)', pointerEvents: 'auto', duration: BD, ease: BE }, 0);
+    c.style.pointerEvents = 'auto';
+    openTl.to(wipe, { v: 0, duration: BD, ease: BE, onUpdate: setWipe }, 0);
     const cS = Math.max(BD, BTN) + PD;
     if (ml) openTl.to(ml, { opacity: 1, y: 0, duration: CD, ease: EI }, cS);
     l.forEach((lk, i) => {
@@ -68,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tl = gsap.timeline({
       onComplete: () => {
         isAnim = false; isOpen = false;
-        gsap.set(c, { clipPath: 'inset(100% 0 0 0)', pointerEvents: 'none' });
+        wipe.v = 100; setWipe(); c.style.pointerEvents = 'none';
         gsap.set(l, { opacity: 0, y: 20 });
         if (ml) gsap.set(ml, { opacity: 0, y: 20 });
         if (!(st === 0 || st) && window.SScroll) window.SScroll.start();
@@ -76,7 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     tl.to(l, { opacity: 0, y: 20, duration: CD, ease: EI }, 0);
     if (ml) tl.to(ml, { opacity: 0, y: 20, duration: CD, ease: EI }, 0);
-    tl.to(c, { clipPath: 'inset(0 0 100% 0)', duration: BD, ease: BE }, 0);
+    var cw = { v: 0 };
+    tl.to(cw, { v: 100, duration: BD, ease: BE, onUpdate: () => { c.style.clipPath = 'inset(0 0 ' + cw.v + '% 0)'; } }, 0);
   };
   m.addEventListener('click', () => (isOpen || openTl) ? closeMenu() : openMenu());
   const mp = { top: 'hero', concept: 'concept', products: 'product', location: 'store', news: 'news', contact: 'contact' };
