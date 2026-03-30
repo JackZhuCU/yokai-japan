@@ -1,0 +1,105 @@
+/* mob-nav */
+document.addEventListener('DOMContentLoaded', () => {
+  const m = document.querySelector('[data-mob-menu]'),
+    c = document.querySelector('.mob--nav-container'),
+    l = document.querySelectorAll('.mob-nav-link'),
+    s = document.querySelectorAll('[data-bg]');
+  if (!m || !c) return;
+  const lines = m.querySelectorAll('div');
+  if (lines.length < 3) return;
+  const tL = lines[0], mL = lines[1], bL = lines[2];
+  const BD = 0.4, PD = 0.1, CD = 0.35, ST = 0.04, BTN = 0.5, EI = 'power2.out', BE = 'circ.inOut';
+  let isOpen = false, isAnim = false, sc = [], mY = 0, lastBg = null;
+  gsap.set(c, { opacity: 0, visibility: 'hidden', pointerEvents: 'none' });
+  gsap.set(l, { opacity: 0, y: 20 });
+  const calc = () => {
+    sc = Array.from(s).map(x => ({ bg: x.getAttribute('data-bg'), top: x.offsetTop, bottom: x.offsetTop + x.offsetHeight })).sort((a, b) => a.top - b.top);
+    const r = m.getBoundingClientRect();
+    mY = r.top + r.height / 2;
+  };
+  const gB = y => {
+    const n = sc.length;
+    if (n === 0) return null;
+    if (y < sc[0].top) return sc[0].bg;
+    if (y >= sc[n - 1].bottom) return sc[n - 1].bg;
+    for (let i = 0; i < n; i++) {
+      if (y >= sc[i].top && y < sc[i].bottom) return sc[i].bg;
+      if (y < sc[i].top) return sc[i - 1].bg;
+    }
+    return sc[n - 1].bg;
+  };
+  const uC = () => {
+    if (isOpen || isAnim) return;
+    const bg = gB(window.scrollY + mY);
+    if (!bg || bg === lastBg) return;
+    lastBg = bg;
+    m.classList.remove(bg === 'light' ? 'is-light' : 'is-dark');
+    m.classList.add(bg === 'light' ? 'is-dark' : 'is-light');
+  };
+  const doScroll = tg => {
+    if (window.SScroll) window.SScroll.start();
+    const ease = x => x < 0.5 ? 4 * x * x * x : (1 - Math.pow(-2 * x + 2, 3) / 2);
+    const dist = Math.abs((tg === 0 ? 0 : tg.getBoundingClientRect().top + window.scrollY) - window.scrollY);
+    const dur = Math.min(Math.max(0.6 + Math.sqrt(dist) / 50, 0.6), 1.8);
+    SScroll.scrollTo(tg, { duration: dur, easing: ease });
+  };
+  const openMenu = () => {
+    if (isAnim || isOpen) return;
+    isAnim = true;
+    if (window.SScroll) window.SScroll.stop();
+    m.classList.add('is-active');
+    const tl = gsap.timeline({ onComplete: () => { isAnim = false; isOpen = true; } });
+    tl.to(tL, { y: 7, duration: BTN * 0.4, ease: BE }, 0);
+    tl.to(mL, { scaleX: 0, opacity: 0, duration: BTN * 0.4, ease: BE }, 0);
+    tl.to(bL, { y: -7, duration: BTN * 0.4, ease: BE }, 0);
+    tl.to(tL, { rotation: 45, duration: BTN * 0.6, ease: BE }, BTN * 0.4);
+    tl.to(bL, { rotation: -45, duration: BTN * 0.6, ease: BE }, BTN * 0.4);
+    tl.to(c, { opacity: 1, visibility: 'visible', pointerEvents: 'auto', duration: BD, ease: EI }, 0);
+    const cS = Math.max(BD, BTN) + PD;
+    l.forEach((lk, i) => {
+      const op = lk.classList.contains('is-active') ? 1 : 0.5;
+      tl.to(lk, { opacity: op, y: 0, duration: CD, ease: EI }, cS + i * ST);
+    });
+  };
+  const closeMenu = st => {
+    if (isAnim || !isOpen) return;
+    isAnim = true;
+    m.classList.remove('is-active');
+    lastBg = null;
+    uC();
+    if (st === 0 || st) { doScroll(st); }
+    const tl = gsap.timeline({
+      onComplete: () => {
+        isAnim = false; isOpen = false;
+        gsap.set(c, { visibility: 'hidden', pointerEvents: 'none' });
+        gsap.set(l, { opacity: 0, y: 20 });
+        if (!(st === 0 || st) && window.SScroll) window.SScroll.start();
+      }
+    });
+    tl.to(tL, { rotation: 0, duration: BTN * 0.6, ease: BE }, 0);
+    tl.to(bL, { rotation: 0, duration: BTN * 0.6, ease: BE }, 0);
+    tl.to(tL, { y: 0, duration: BTN * 0.4, ease: BE }, BTN * 0.6);
+    tl.to(mL, { scaleX: 1, opacity: 1, duration: BTN * 0.4, ease: BE }, BTN * 0.6);
+    tl.to(bL, { y: 0, duration: BTN * 0.4, ease: BE }, BTN * 0.6);
+    tl.to(l, { opacity: 0, y: 20, duration: CD, ease: EI }, 0);
+    tl.to(c, { opacity: 0, duration: BD, ease: EI }, 0);
+  };
+  m.addEventListener('click', () => isOpen ? closeMenu() : openMenu());
+  const mp = { top: 'hero', concept: 'concept', products: 'product', location: 'store', news: 'news', contact: 'contact' };
+  const getText = el => {
+    let t = el.querySelector('.small-text')?.textContent.trim().toLowerCase();
+    if (t && t.length % 2 === 0 && t.slice(0, t.length / 2) === t.slice(t.length / 2)) t = t.slice(0, t.length / 2);
+    return t;
+  };
+  l.forEach(lk => {
+    lk.addEventListener('click', e => {
+      e.preventDefault();
+      const t = getText(lk), id = mp[t] || t, tg = t === 'top' ? 0 : document.getElementById(id);
+      (tg === 0 || tg) ? closeMenu(tg) : closeMenu();
+    });
+  });
+  calc();
+  uC();
+  window.addEventListener('scroll', uC, { passive: true });
+  window.addEventListener('resize', () => { calc(); uC(); });
+});

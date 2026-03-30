@@ -23,6 +23,7 @@ const mainFiles = [
   '10-nav-scrollto.js',
   '11-lightbox.js',
   '12-store-tabs.js',
+  '14-mob-nav.js',
 ];
 
 // 1. Build main.min.js
