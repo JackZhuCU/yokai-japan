@@ -3,7 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const m = document.querySelector('[data-mob-menu]'),
     c = document.querySelector('.mob--nav-container'),
     l = document.querySelectorAll('.mob-nav-link'),
-    s = document.querySelectorAll('[data-bg]');
+    s = document.querySelectorAll('[data-bg]'),
+    ml = c?.querySelector('.nav--logo-wrapper.mobile');
   if (!m || !c) return;
   const lines = m.querySelectorAll('div');
   if (lines.length < 3) return;
@@ -12,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isOpen = false, isAnim = false, sc = [], mY = 0, lastBg = null;
   gsap.set(c, { opacity: 0, visibility: 'hidden', pointerEvents: 'none' });
   gsap.set(l, { opacity: 0, y: 20 });
+  if (ml) gsap.set(ml, { opacity: 0, y: 20 });
   const calc = () => {
     sc = Array.from(s).map(x => ({ bg: x.getAttribute('data-bg'), top: x.offsetTop, bottom: x.offsetTop + x.offsetHeight })).sort((a, b) => a.top - b.top);
     const r = m.getBoundingClientRect();
@@ -56,9 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
     tl.to(bL, { rotation: -45, duration: BTN * 0.6, ease: BE }, BTN * 0.4);
     tl.to(c, { opacity: 1, visibility: 'visible', pointerEvents: 'auto', duration: BD, ease: EI }, 0);
     const cS = Math.max(BD, BTN) + PD;
+    if (ml) tl.to(ml, { opacity: 1, y: 0, duration: CD, ease: EI }, cS);
     l.forEach((lk, i) => {
       const op = lk.classList.contains('is-active') ? 1 : 0.5;
-      tl.to(lk, { opacity: op, y: 0, duration: CD, ease: EI }, cS + i * ST);
+      tl.to(lk, { opacity: op, y: 0, duration: CD, ease: EI }, cS + (i + (ml ? 1 : 0)) * ST);
     });
   };
   const closeMenu = st => {
@@ -73,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isAnim = false; isOpen = false;
         gsap.set(c, { visibility: 'hidden', pointerEvents: 'none' });
         gsap.set(l, { opacity: 0, y: 20 });
+        if (ml) gsap.set(ml, { opacity: 0, y: 20 });
         if (!(st === 0 || st) && window.SScroll) window.SScroll.start();
       }
     });
@@ -82,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     tl.to(mL, { scaleX: 1, opacity: 1, duration: BTN * 0.4, ease: BE }, BTN * 0.6);
     tl.to(bL, { y: 0, duration: BTN * 0.4, ease: BE }, BTN * 0.6);
     tl.to(l, { opacity: 0, y: 20, duration: CD, ease: EI }, 0);
+    if (ml) tl.to(ml, { opacity: 0, y: 20, duration: CD, ease: EI }, 0);
     tl.to(c, { opacity: 0, duration: BD, ease: EI }, 0);
   };
   m.addEventListener('click', () => isOpen ? closeMenu() : openMenu());
