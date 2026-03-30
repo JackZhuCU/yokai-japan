@@ -7,8 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ml = c?.querySelector('.nav--logo-wrapper.mobile');
   if (!m || !c) return;
   const lines = m.querySelectorAll('div');
-  if (lines.length < 3) return;
-  const tL = lines[0], mL = lines[1], bL = lines[2];
+  if (lines.length < 2) return;
   const BD = 0.7, PD = 0.15, CD = 0.6, ST = 0.07, BTN = 0.8, EI = 'expo.out', BE = 'circ.inOut';
   let isOpen = false, isAnim = false, openTl = null, sc = [], mY = 0, lastBg = null;
   gsap.set(c, { opacity: 0, visibility: 'hidden', pointerEvents: 'none' });
@@ -51,11 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.SScroll) window.SScroll.stop();
     m.classList.add('is-active');
     openTl = gsap.timeline({ onComplete: () => { isAnim = false; isOpen = true; openTl = null; } });
-    openTl.to(tL, { y: 7, duration: BTN * 0.4, ease: BE }, 0);
-    openTl.to(mL, { scaleX: 0, opacity: 0, duration: BTN * 0.4, ease: BE }, 0);
-    openTl.to(bL, { y: -7, duration: BTN * 0.4, ease: BE }, 0);
-    openTl.to(tL, { rotation: 45, duration: BTN * 0.6, ease: BE }, BTN * 0.4);
-    openTl.to(bL, { rotation: -45, duration: BTN * 0.6, ease: BE }, BTN * 0.4);
     openTl.to(c, { opacity: 1, visibility: 'visible', pointerEvents: 'auto', duration: BD, ease: EI }, 0);
     const cS = Math.max(BD, BTN) + PD;
     if (ml) openTl.to(ml, { opacity: 1, y: 0, duration: CD, ease: EI }, cS);
@@ -80,11 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!(st === 0 || st) && window.SScroll) window.SScroll.start();
       }
     });
-    tl.to(tL, { rotation: 0, duration: BTN * 0.6, ease: BE }, 0);
-    tl.to(bL, { rotation: 0, duration: BTN * 0.6, ease: BE }, 0);
-    tl.to(tL, { y: 0, duration: BTN * 0.4, ease: BE }, BTN * 0.6);
-    tl.to(mL, { scaleX: 1, opacity: 1, duration: BTN * 0.4, ease: BE }, BTN * 0.6);
-    tl.to(bL, { y: 0, duration: BTN * 0.4, ease: BE }, BTN * 0.6);
     tl.to(l, { opacity: 0, y: 20, duration: CD, ease: EI }, 0);
     if (ml) tl.to(ml, { opacity: 0, y: 20, duration: CD, ease: EI }, 0);
     tl.to(c, { opacity: 0, duration: BD, ease: EI }, 0);
