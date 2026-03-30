@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (lines.length < 2) return;
   const BD = 0.7, PD = 0.15, CD = 0.6, ST = 0.07, BTN = 0.8, EI = 'expo.out', BE = 'circ.inOut';
   let isOpen = false, isAnim = false, openTl = null, sc = [], mY = 0, lastBg = null;
-  gsap.set(c, { display: 'flex', clipPath: 'inset(100% 0 0 0)', visibility: 'visible', pointerEvents: 'none' });
+  gsap.set(c, { opacity: 1, visibility: 'visible', clipPath: 'inset(100% 0 0 0)', pointerEvents: 'none' });
   gsap.set(l, { opacity: 0, y: 20 });
   if (ml) gsap.set(ml, { opacity: 0, y: 20 });
   const calc = () => {
