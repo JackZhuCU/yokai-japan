@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     openTl = gsap.timeline({ onComplete: () => { isAnim = false; isOpen = true; openTl = null; } });
     c.style.pointerEvents = 'auto';
     openTl.to(wipe, { v: 0, duration: BD, ease: BE, onUpdate: setWipe }, 0);
-    const cS = Math.max(BD, BTN) + PD;
+    const cS = BD * 0.4;
     if (ml) openTl.to(ml, { opacity: 1, y: 0, duration: CD, ease: EI }, cS);
     l.forEach((lk, i) => {
       const op = lk.classList.contains('is-active') ? 1 : 0.5;
@@ -78,8 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!(st === 0 || st) && window.SScroll) window.SScroll.start();
       }
     });
-    tl.to(l, { opacity: 0, y: 20, duration: CD, ease: EI }, 0);
-    if (ml) tl.to(ml, { opacity: 0, y: 20, duration: CD, ease: EI }, 0);
+    tl.to(l, { opacity: 0, y: -20, duration: CD, ease: EI }, 0);
+    if (ml) tl.to(ml, { opacity: 0, y: -20, duration: CD, ease: EI }, 0);
     var cw = { v: 0 };
     tl.to(cw, { v: 100, duration: BD, ease: BE, onUpdate: () => { c.style.clipPath = 'inset(0 0 ' + cw.v + '% 0)'; } }, 0);
   };
