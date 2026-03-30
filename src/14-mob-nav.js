@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!m || !c) return;
   const lines = m.querySelectorAll('div');
   if (lines.length < 2) return;
-  const BD = 0.7, PD = 0.15, CD = 0.6, ST = 0.07, BTN = 0.8, EI = 'expo.out', BE = 'circ.inOut';
+  const BD = 0.7, CD = 0.6, ST = 0.07, EI = 'expo.out', BE = 'circ.inOut';
   let isOpen = false, isAnim = false, openTl = null, sc = [], mY = 0, lastBg = null;
   const wipe = { v: 100 };
   const setWipe = () => { c.style.clipPath = 'inset(' + wipe.v + '% 0 0 0)'; };
