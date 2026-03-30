@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (lines.length < 3) return;
   const tL = lines[0], mL = lines[1], bL = lines[2];
   const BD = 0.7, PD = 0.15, CD = 0.6, ST = 0.07, BTN = 0.8, EI = 'expo.out', BE = 'circ.inOut';
-  let isOpen = false, isAnim = false, sc = [], mY = 0, lastBg = null;
+  let isOpen = false, isAnim = false, openTl = null, sc = [], mY = 0, lastBg = null;
   gsap.set(c, { opacity: 0, visibility: 'hidden', pointerEvents: 'none' });
   gsap.set(l, { opacity: 0, y: 20 });
   if (ml) gsap.set(ml, { opacity: 0, y: 20 });
@@ -50,23 +50,23 @@ document.addEventListener('DOMContentLoaded', () => {
     isAnim = true;
     if (window.SScroll) window.SScroll.stop();
     m.classList.add('is-active');
-    const tl = gsap.timeline({ onComplete: () => { isAnim = false; isOpen = true; } });
-    tl.to(tL, { y: 7, duration: BTN * 0.4, ease: BE }, 0);
-    tl.to(mL, { scaleX: 0, opacity: 0, duration: BTN * 0.4, ease: BE }, 0);
-    tl.to(bL, { y: -7, duration: BTN * 0.4, ease: BE }, 0);
-    tl.to(tL, { rotation: 45, duration: BTN * 0.6, ease: BE }, BTN * 0.4);
-    tl.to(bL, { rotation: -45, duration: BTN * 0.6, ease: BE }, BTN * 0.4);
-    tl.to(c, { opacity: 1, visibility: 'visible', pointerEvents: 'auto', duration: BD, ease: EI }, 0);
+    openTl = gsap.timeline({ onComplete: () => { isAnim = false; isOpen = true; openTl = null; } });
+    openTl.to(tL, { y: 7, duration: BTN * 0.4, ease: BE }, 0);
+    openTl.to(mL, { scaleX: 0, opacity: 0, duration: BTN * 0.4, ease: BE }, 0);
+    openTl.to(bL, { y: -7, duration: BTN * 0.4, ease: BE }, 0);
+    openTl.to(tL, { rotation: 45, duration: BTN * 0.6, ease: BE }, BTN * 0.4);
+    openTl.to(bL, { rotation: -45, duration: BTN * 0.6, ease: BE }, BTN * 0.4);
+    openTl.to(c, { opacity: 1, visibility: 'visible', pointerEvents: 'auto', duration: BD, ease: EI }, 0);
     const cS = Math.max(BD, BTN) + PD;
-    if (ml) tl.to(ml, { opacity: 1, y: 0, duration: CD, ease: EI }, cS);
+    if (ml) openTl.to(ml, { opacity: 1, y: 0, duration: CD, ease: EI }, cS);
     l.forEach((lk, i) => {
       const op = lk.classList.contains('is-active') ? 1 : 0.5;
-      tl.to(lk, { opacity: op, y: 0, duration: CD, ease: EI }, cS + (i + (ml ? 1 : 0)) * ST);
+      openTl.to(lk, { opacity: op, y: 0, duration: CD, ease: EI }, cS + (i + (ml ? 1 : 0)) * ST);
     });
   };
   const closeMenu = st => {
-    if (isAnim || !isOpen) return;
-    isAnim = true;
+    if (openTl) { openTl.kill(); openTl = null; }
+    isAnim = true; isOpen = false;
     m.classList.remove('is-active');
     lastBg = null;
     uC();
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (ml) tl.to(ml, { opacity: 0, y: 20, duration: CD, ease: EI }, 0);
     tl.to(c, { opacity: 0, duration: BD, ease: EI }, 0);
   };
-  m.addEventListener('click', () => isOpen ? closeMenu() : openMenu());
+  m.addEventListener('click', () => (isOpen || openTl) ? closeMenu() : openMenu());
   const mp = { top: 'hero', concept: 'concept', products: 'product', location: 'store', news: 'news', contact: 'contact' };
   const getText = el => {
     let t = el.querySelector('.small-text')?.textContent.trim().toLowerCase();
