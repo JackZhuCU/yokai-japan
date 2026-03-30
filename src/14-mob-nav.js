@@ -78,8 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!(st === 0 || st) && window.SScroll) window.SScroll.start();
       }
     });
-    tl.to(l, { opacity: 0, y: -20, duration: CD, ease: EI }, 0);
-    if (ml) tl.to(ml, { opacity: 0, y: -20, duration: CD, ease: EI }, 0);
+    var lArr = Array.from(l).reverse();
+    if (ml) lArr.push(ml);
+    lArr.forEach((lk, i) => {
+      tl.to(lk, { opacity: 0, y: -20, duration: CD, ease: EI }, i * ST);
+    });
     var cw = { v: 0 };
     tl.to(cw, { v: 100, duration: BD, ease: BE, onUpdate: () => { c.style.clipPath = 'inset(0 0 ' + cw.v + '% 0)'; } }, 0);
   };
