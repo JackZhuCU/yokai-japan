@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const lines = m.querySelectorAll('div');
   if (lines.length < 3) return;
   const tL = lines[0], mL = lines[1], bL = lines[2];
-  const BD = 0.4, PD = 0.1, CD = 0.35, ST = 0.04, BTN = 0.5, EI = 'power2.out', BE = 'circ.inOut';
+  const BD = 0.7, PD = 0.15, CD = 0.6, ST = 0.07, BTN = 0.8, EI = 'expo.out', BE = 'circ.inOut';
   let isOpen = false, isAnim = false, sc = [], mY = 0, lastBg = null;
   gsap.set(c, { opacity: 0, visibility: 'hidden', pointerEvents: 'none' });
   gsap.set(l, { opacity: 0, y: 20 });
